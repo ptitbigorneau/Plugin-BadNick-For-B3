@@ -1,7 +1,7 @@
 # Badnick Plugin
 
 __author__  = 'PtitBigorneau www.ptitbigorneau.fr'
-__version__ = '1.8'
+__version__ = '1.9'
 
 
 import b3, time, threading, thread
@@ -11,25 +11,44 @@ import b3.plugin
 class BadnickPlugin(b3.plugin.Plugin):
 
     _adminPlugin = None
+    _minlevel = 40
+    _badnickminlevel = 100
+    _protectlevel = 20
 
-    def onLoadConfig(self):
-    
+    def onStartup(self):
+
         self._adminPlugin = self.console.getPlugin('admin')
         if not self._adminPlugin:
 
             self.error('Could not find admin plugin')
             return False
-        
-        self._minlevel = self.config.getint('settings', 'minlevel')
-        self._badnickminlevel = self.config.getint('settings', 'badnickminlevel')
-        self._protectlevel = self.config.getint('settings', 'protectlevel')
-        
+
         self._adminPlugin.registerCommand(self, 'badnick',self._minlevel, self.cmd_badnick)
         self._adminPlugin.registerCommand(self, 'addbadnick',self._badnickminlevel, self.cmd_addbadnick, 'addbn')
         self._adminPlugin.registerCommand(self, 'addverybadnick',self._badnickminlevel, self.cmd_addverybadnick, 'addvbn')
         
         self.registerEvent(b3.events.EVT_CLIENT_AUTH)
         self.registerEvent(b3.events.EVT_CLIENT_NAME_CHANGE)
+
+    def onLoadConfig(self):
+        
+        try:
+            self._minlevel = self.config.getint('settings', 'minlevel')
+        except Exception, err:
+            self.warning("Using default value %s for minlevel. %s" % (self._minlevel, err))
+        self.debug('minlevel : %s' % self._minlevel)
+
+        try:
+            self._badnickminlevel = self.config.getint('settings', 'badnickminlevel')
+        except Exception, err:
+            self.warning("Using default value %s for badnickminlevel. %s" % (self._badnickminlevel, err))
+        self.debug('badnickminlevel : %s' % self._badnickminlevel)
+
+        try:
+            self._protectlevel = self.config.getint('settings', 'protectlevel')
+        except Exception, err:
+            self.warning("Using default value %s for protectlevel. %s" % (self._protectlevel, err))
+        self.debug('protectlevel : %s' % self._protectlevel)
     
     def onEvent(self, event):
         
